@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "极简待办应用 - 可爱风格",
   "type": "module",
+  "homepage": "https://coderxurui.github.io/todo-list-web/",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
