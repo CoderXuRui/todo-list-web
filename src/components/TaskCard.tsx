@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useTaskStore } from '../stores/taskStore';
 import type { Task } from '../types';
 import { formatDate, getPriorityColor } from '../utils/date';
 import { playCompleteSound, playSubtaskCompleteSound } from '../utils/sound';
+import { useCelebration } from '../hooks/useCelebration';
 
 interface TaskCardProps {
   task: Task;
@@ -13,6 +14,8 @@ export function TaskCard({ task, onEdit }: TaskCardProps) {
   const { toggleTask, deleteTask, categories, toggleSubtask, deleteSubtask, addSubtask } = useTaskStore();
   const [expanded, setExpanded] = useState(false);
   const [newSubtask, setNewSubtask] = useState('');
+  const checkboxRef = useRef<HTMLButtonElement>(null);
+  const { particles, trigger } = useCelebration();
 
   const category = categories.find((c) => c.id === task.category);
   const completedSubtasks = task.subtasks.filter((st) => st.completed).length;
@@ -34,9 +37,11 @@ export function TaskCard({ task, onEdit }: TaskCardProps) {
       <div className="flex items-start gap-4">
         {/* Checkbox */}
         <button
+          ref={checkboxRef}
           onClick={() => {
             if (!task.completed) {
               playCompleteSound();
+              trigger(checkboxRef.current);
             }
             toggleTask(task.id);
           }}
@@ -50,6 +55,23 @@ export function TaskCard({ task, onEdit }: TaskCardProps) {
             <span className="text-white text-lg font-bold animate-pop">✓</span>
           )}
         </button>
+
+        {/* Celebration particles */}
+        {particles.map((p) => (
+          <div
+            key={p.id}
+            className="fixed pointer-events-none z-50"
+            style={{
+              left: p.x,
+              top: p.y,
+              width: p.size,
+              height: p.size,
+              backgroundColor: p.color,
+              borderRadius: '50%',
+              transform: `rotate(${p.rotation}deg)`,
+            }}
+          />
+        ))}
 
         {/* Content */}
         <div className="flex-1 min-w-0">

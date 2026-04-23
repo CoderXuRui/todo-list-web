@@ -1,9 +1,9 @@
 {
-  "name": "todo-list",
+  "name": "bloom-todo",
   "version": "1.0.0",
-  "description": "极简待办应用 - 可爱风格",
+  "description": "Bloom Todo - 可爱待办应用",
   "type": "module",
-  "homepage": "https://coderxurui.github.io/todo-list-web/",
+  "homepage": "https://coderxurui.github.io/bloom-todo/",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",

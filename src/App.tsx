@@ -72,7 +72,7 @@ function App() {
           <div className="inline-flex items-center gap-3 mb-2">
             <span className="text-4xl">📝</span>
             <h1 className="font-display text-4xl font-extrabold bg-gradient-to-r from-coral via-blush to-lavender bg-clip-text text-transparent">
-              极简待办
+              Bloom Todo
             </h1>
             <span className="text-4xl">✨</span>
           </div>
