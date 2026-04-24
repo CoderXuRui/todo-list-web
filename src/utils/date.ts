@@ -1,7 +1,5 @@
 import { format, isToday, isTomorrow, isYesterday, parseISO } from 'date-fns';
 
-const weekDays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
-
 export const formatDate = (dateString: string | null): string => {
   if (!dateString) return '';
 
@@ -12,17 +10,6 @@ export const formatDate = (dateString: string | null): string => {
   if (isYesterday(date)) return '昨天';
 
   return format(date, 'MM/dd');
-};
-
-export const formatFullDate = (dateString: string): string => {
-  const date = parseISO(dateString);
-  const weekDay = weekDays[date.getDay()];
-  return `${format(date, 'yyyy年MM月dd日')} ${weekDay} ${format(date, 'HH:mm')}`;
-};
-
-export const getWeekDay = (dateString: string): string => {
-  const date = parseISO(dateString);
-  return weekDays[date.getDay()];
 };
 
 export const getPriorityLabel = (priority: string): string => {

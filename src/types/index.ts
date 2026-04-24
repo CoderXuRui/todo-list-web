@@ -16,6 +16,7 @@ export interface Task {
   completed: boolean;
   createdAt: string;
   subtasks: Subtask[];
+  deletedAt: string | null;
 }
 
 export interface Category {

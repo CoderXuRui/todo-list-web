@@ -28,8 +28,8 @@ export function CategoryFilter({ selected, onSelect }: CategoryFilterProps) {
           onClick={() => onSelect('all')}
           className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${
             selected === 'all'
-              ? 'bg-gray-700 text-white shadow-soft'
-              : 'bg-white text-gray-500 hover:bg-gray-50'
+              ? 'bg-gray-700 dark:bg-gray-600 text-white shadow-soft'
+              : 'bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
           }`}
         >
           全部
@@ -63,7 +63,7 @@ export function CategoryFilter({ selected, onSelect }: CategoryFilterProps) {
               onChange={(e) => setNewName(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
               placeholder="分类名"
-              className="w-24 px-3 py-2 text-sm rounded-full border-2 border-lavender bg-white outline-none"
+              className="w-24 px-3 py-2 text-sm rounded-full border-2 border-lavender bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 outline-none"
               autoFocus
             />
             <button
@@ -76,7 +76,7 @@ export function CategoryFilter({ selected, onSelect }: CategoryFilterProps) {
             </button>
             <button
               onClick={() => setShowAdd(false)}
-              className="p-2 rounded-full bg-gray-200 text-gray-500 hover:bg-gray-300 transition-colors"
+              className="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -86,7 +86,7 @@ export function CategoryFilter({ selected, onSelect }: CategoryFilterProps) {
         ) : (
           <button
             onClick={() => setShowAdd(true)}
-            className="p-2 rounded-full bg-white text-gray-400 hover:bg-cream hover:text-lavender transition-all duration-200 shadow-soft"
+            className="p-2 rounded-full bg-white dark:bg-gray-800 text-gray-400 dark:text-gray-500 hover:bg-cream dark:hover:bg-gray-700 hover:text-lavender transition-all duration-200 shadow-soft"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />

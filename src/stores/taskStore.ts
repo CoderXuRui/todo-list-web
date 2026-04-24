@@ -8,15 +8,20 @@ interface TaskStore {
   categories: Category[];
 
   // Task actions
-  addTask: (task: Omit<Task, 'id' | 'createdAt'>) => void;
+  addTask: (task: Omit<Task, 'id' | 'createdAt' | 'deletedAt'>) => void;
   updateTask: (id: string, updates: Partial<Task>) => void;
   deleteTask: (id: string) => void;
   toggleTask: (id: string) => void;
+  restoreTask: (id: string) => void;
+  permanentDeleteTask: (id: string) => void;
 
   // Subtask actions
   addSubtask: (taskId: string, title: string) => void;
   toggleSubtask: (taskId: string, subtaskId: string) => void;
   deleteSubtask: (taskId: string, subtaskId: string) => void;
+
+  // Reorder
+  reorderTasks: (activeId: string, overId: string) => void;
 
   // Category actions
   addCategory: (name: string, color: string) => void;
@@ -45,7 +50,7 @@ export const useTaskStore = create<TaskStore>()(
               ...task,
               id: uuidv4(),
               createdAt: new Date().toISOString(),
-              subtasks: [],
+              deletedAt: null,
             },
           ],
         })),
@@ -59,7 +64,9 @@ export const useTaskStore = create<TaskStore>()(
 
       deleteTask: (id) =>
         set((state) => ({
-          tasks: state.tasks.filter((task) => task.id !== id),
+          tasks: state.tasks.map((task) =>
+            task.id === id ? { ...task, deletedAt: new Date().toISOString() } : task
+          ),
         })),
 
       toggleTask: (id) =>
@@ -68,6 +75,29 @@ export const useTaskStore = create<TaskStore>()(
             task.id === id ? { ...task, completed: !task.completed } : task
           ),
         })),
+
+      restoreTask: (id) =>
+        set((state) => ({
+          tasks: state.tasks.map((task) =>
+            task.id === id ? { ...task, deletedAt: null } : task
+          ),
+        })),
+
+      permanentDeleteTask: (id) =>
+        set((state) => ({
+          tasks: state.tasks.filter((task) => task.id !== id),
+        })),
+
+      reorderTasks: (activeId, overId) =>
+        set((state) => {
+          const oldIndex = state.tasks.findIndex((t) => t.id === activeId);
+          const newIndex = state.tasks.findIndex((t) => t.id === overId);
+          if (oldIndex === -1 || newIndex === -1) return state;
+          const newTasks = [...state.tasks];
+          const [removed] = newTasks.splice(oldIndex, 1);
+          newTasks.splice(newIndex, 0, removed);
+          return { tasks: newTasks };
+        }),
 
       addSubtask: (taskId, title) =>
         set((state) => ({
@@ -135,14 +165,19 @@ export const useTaskStore = create<TaskStore>()(
     }),
     {
       name: 'todo-storage',
-      version: 1,
+      version: 2,
+      partialize: (state) => ({
+        tasks: state.tasks,
+        categories: state.categories,
+      }),
       onRehydrateStorage: () => (state) => {
         if (state) {
-          // 确保所有task都有subtasks和description
+          // 确保所有task都有subtasks、description、deletedAt
           state.tasks = state.tasks.map((task) => ({
             ...task,
             subtasks: task.subtasks || [],
             description: task.description || '',
+            deletedAt: task.deletedAt ?? null,
           }));
           // 确保有默认分类
           if (!state.categories || state.categories.length === 0) {

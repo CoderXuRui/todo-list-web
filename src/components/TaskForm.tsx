@@ -1,36 +1,47 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { useTaskStore } from '../stores/taskStore';
-import type { Priority } from '../types';
+import type { Priority, Task } from '../types';
 import { getPriorityLabel, getPriorityColor } from '../utils/date';
 
 const priorities: Priority[] = ['high', 'medium', 'low'];
 
 interface TaskFormProps {
   onClose: () => void;
+  task?: Task | null;
 }
 
-export function TaskForm({ onClose }: TaskFormProps) {
-  const { categories, addTask } = useTaskStore();
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [category, setCategory] = useState(categories[0]?.id || '');
-  const [priority, setPriority] = useState<Priority>('medium');
-  const [deadline, setDeadline] = useState('');
-  const inputRef = useRef<HTMLInputElement>(null);
+export function TaskForm({ onClose, task }: TaskFormProps) {
+  const { categories, addTask, updateTask } = useTaskStore();
+  const isEditing = !!task;
+  const [title, setTitle] = useState(task?.title || '');
+  const [description, setDescription] = useState(task?.description || '');
+  const [category, setCategory] = useState(task?.category || categories[0]?.id || '');
+  const [priority, setPriority] = useState<Priority>(task?.priority || 'medium');
+  const [deadline, setDeadline] = useState(task?.deadline || '');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
 
-    addTask({
-      title: title.trim(),
-      description: description.trim(),
-      category,
-      priority,
-      deadline: deadline || null,
-      completed: false,
-      subtasks: [],
-    });
+    if (isEditing && task) {
+      updateTask(task.id, {
+        title: title.trim(),
+        description: description.trim(),
+        category,
+        priority,
+        deadline: deadline || null,
+      });
+    } else {
+      addTask({
+        title: title.trim(),
+        description: description.trim(),
+        category,
+        priority,
+        deadline: deadline || null,
+        completed: false,
+        subtasks: [],
+      });
+    }
 
     onClose();
   };
@@ -39,32 +50,31 @@ export function TaskForm({ onClose }: TaskFormProps) {
     <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in p-4">
       <form
         onSubmit={handleSubmit}
-        className="bg-white rounded-3xl shadow-bubble p-8 w-full max-w-md animate-bounce-in"
+        className="bg-white dark:bg-gray-800 rounded-3xl shadow-bubble p-8 w-full max-w-md animate-bounce-in"
       >
-        <h2 className="font-display text-2xl font-bold text-gray-700 mb-6 text-center">
-          ✨ 新任务
+        <h2 className="font-display text-2xl font-bold text-gray-700 dark:text-gray-200 mb-6 text-center">
+          {isEditing ? '✏️ 编辑任务' : '✨ 新任务'}
         </h2>
 
         <div className="space-y-5">
           {/* Title */}
           <div>
-            <label className="block text-sm font-semibold text-gray-500 mb-2">
+            <label className="block text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">
               任务名称
             </label>
             <input
-              ref={inputRef}
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="今天要做什么呢？"
-              className="w-full px-4 py-3 rounded-xl border-2 border-cream focus:border-lavender bg-cream/30 font-medium transition-all duration-200 outline-none"
+              className="w-full px-4 py-3 rounded-xl border-2 border-cream dark:border-gray-700 focus:border-lavender bg-cream/30 dark:bg-gray-700/50 text-gray-700 dark:text-gray-200 font-medium transition-all duration-200 outline-none"
               autoFocus
             />
           </div>
 
           {/* Category */}
           <div>
-            <label className="block text-sm font-semibold text-gray-500 mb-2">
+            <label className="block text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">
               分类
             </label>
             <div className="flex flex-wrap gap-2">
@@ -91,7 +101,7 @@ export function TaskForm({ onClose }: TaskFormProps) {
 
           {/* Priority */}
           <div>
-            <label className="block text-sm font-semibold text-gray-500 mb-2">
+            <label className="block text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">
               优先级
             </label>
             <div className="flex gap-2">
@@ -116,20 +126,20 @@ export function TaskForm({ onClose }: TaskFormProps) {
 
           {/* Deadline */}
           <div>
-            <label className="block text-sm font-semibold text-gray-500 mb-2">
+            <label className="block text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">
               截止日期
             </label>
             <input
               type="date"
               value={deadline}
               onChange={(e) => setDeadline(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border-2 border-cream focus:border-lavender bg-cream/30 font-medium transition-all duration-200 outline-none"
+              className="w-full px-4 py-3 rounded-xl border-2 border-cream dark:border-gray-700 focus:border-lavender bg-cream/30 dark:bg-gray-700/50 text-gray-700 dark:text-gray-200 font-medium transition-all duration-200 outline-none"
             />
           </div>
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-semibold text-gray-500 mb-2">
+            <label className="block text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">
               备注
             </label>
             <textarea
@@ -137,7 +147,7 @@ export function TaskForm({ onClose }: TaskFormProps) {
               onChange={(e) => setDescription(e.target.value)}
               placeholder="添加备注信息..."
               rows={3}
-              className="w-full px-4 py-3 rounded-xl border-2 border-cream focus:border-lavender bg-cream/30 font-medium transition-all duration-200 outline-none resize-none"
+              className="w-full px-4 py-3 rounded-xl border-2 border-cream dark:border-gray-700 focus:border-lavender bg-cream/30 dark:bg-gray-700/50 text-gray-700 dark:text-gray-200 font-medium transition-all duration-200 outline-none resize-none"
             />
           </div>
         </div>
@@ -147,7 +157,7 @@ export function TaskForm({ onClose }: TaskFormProps) {
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 py-3 rounded-xl font-semibold text-gray-500 bg-gray-100 hover:bg-gray-200 transition-colors"
+            className="flex-1 py-3 rounded-xl font-semibold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
           >
             取消
           </button>
@@ -156,7 +166,7 @@ export function TaskForm({ onClose }: TaskFormProps) {
             disabled={!title.trim()}
             className="flex-1 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-blush to-coral hover:shadow-lift transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            添加 ✨
+            {isEditing ? '保存 ✨' : '添加 ✨'}
           </button>
         </div>
       </form>
