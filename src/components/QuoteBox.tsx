@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { quotes } from '../utils/quotes';
 
 function getTodayKey() {
@@ -6,12 +7,14 @@ function getTodayKey() {
 }
 
 export function QuoteBox() {
-  // 用 sessionStorage 记录当天当前显示到第几句
-  const key = getTodayKey();
-  const storedIndex = parseInt(sessionStorage.getItem(key) || '0', 10);
-  const quote = quotes[storedIndex % quotes.length];
-  // 刷新后换下一句
-  sessionStorage.setItem(key, String((storedIndex + 1) % quotes.length));
+  const [quote] = useState(() => {
+    const key = getTodayKey();
+    const storedIndex = parseInt(sessionStorage.getItem(key) || '0', 10);
+    // 挂载时设置下一句，但只在刷新页面时才变
+    const nextIndex = (storedIndex + 1) % quotes.length;
+    sessionStorage.setItem(key, String(nextIndex));
+    return quotes[storedIndex % quotes.length];
+  });
 
   return (
     <div className="fixed left-4 top-1/2 -translate-y-1/2 w-48 p-4 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-soft border border-lavender/20 dark:border-lavender/30 animate-fade-in z-10">

@@ -17,6 +17,7 @@ import {
 import { useTaskStore } from './stores/taskStore';
 import { usePomodoroStore } from './stores/pomodoroStore';
 import { useTheme } from './hooks/useTheme';
+import { requestNotificationPermission, notifyTaskDeadline } from './utils/notifications';
 import { Stats } from './components/Stats';
 import { QuoteBox } from './components/QuoteBox';
 import { CategoryFilter } from './components/CategoryFilter';
@@ -54,6 +55,20 @@ function App() {
     const id = setInterval(() => forceUpdate((v) => v + 1), 1000);
     return () => clearInterval(id);
   }, [pomodoro.isRunning, showPomodoro]);
+
+  // 启动时检查是否需要发送截止提醒（每天只发一次）
+  useEffect(() => {
+    const todayKey = `deadline-notify-${new Date().toDateString()}`;
+    if (sessionStorage.getItem(todayKey)) return;
+
+    const todayStr = new Date().toISOString().split('T')[0];
+    const overdue = tasks.filter((t) => !t.completed && t.deletedAt === null && t.deadline && t.deadline <= todayStr);
+
+    if (overdue.length > 0 && Notification.permission === 'granted') {
+      notifyTaskDeadline(overdue[0].title);
+      sessionStorage.setItem(todayKey, '1');
+    }
+  }, []);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -235,8 +250,28 @@ function App() {
           </p>
         </header>
 
-        {/* Theme toggle */}
-        <div className="flex justify-end mb-4">
+        {/* Theme toggle & Notification */}
+        <div className="flex justify-end mb-4 gap-2">
+          <button
+            onClick={async () => {
+              if (Notification.permission === 'granted') return;
+              await requestNotificationPermission();
+            }}
+            className={`p-2.5 rounded-xl bg-white dark:bg-gray-800 border-2 border-cream dark:border-gray-700 transition-all duration-300 shadow-soft ${
+              Notification.permission === 'granted'
+                ? 'text-mint hover:text-lavender hover:border-lavender'
+                : 'text-gray-400 hover:text-lavender hover:border-lavender'
+            }`}
+            title={Notification.permission === 'granted' ? '通知已开启' : '开启通知'}
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              {Notification.permission === 'granted' ? (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              )}
+            </svg>
+          </button>
           <button
             onClick={toggleTheme}
             className="p-2.5 rounded-xl bg-white dark:bg-gray-800 border-2 border-cream dark:border-gray-700 text-gray-400 dark:text-gray-300 hover:text-lavender dark:hover:text-lavender hover:border-lavender transition-all duration-300 shadow-soft"

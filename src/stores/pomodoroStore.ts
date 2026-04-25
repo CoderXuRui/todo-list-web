@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { notifyPomodoroComplete } from '../utils/notifications';
 
 type TimerMode = 'work' | 'break';
 
@@ -143,6 +144,8 @@ export const usePomodoroStore = create<PomodoroStore>()(
 
         // 播放提示音
         playCompleteSound();
+        // 发送桌面通知
+        notifyPomodoroComplete(state.mode === 'work');
       },
 
       updateSettings: (partial) => {
