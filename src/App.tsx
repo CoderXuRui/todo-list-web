@@ -25,6 +25,7 @@ import { TaskCard } from './components/TaskCard';
 import { SortableTaskCard } from './components/SortableTaskCard';
 import { TaskForm } from './components/TaskForm';
 import { Pomodoro } from './components/Pomodoro';
+import { OnboardingGuide } from './components/OnboardingGuide';
 import type { Task, Priority } from './types';
 
 type SortKey = 'date' | 'priority' | 'created' | 'manual';
@@ -47,6 +48,7 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('tasks');
   const [showPomodoro, setShowPomodoro] = useState(false);
+  const [showGuide, setShowGuide] = useState<boolean | undefined>(undefined);
 
   // 番茄钟运行时，每秒刷新按钮上的时间显示
   const [, forceUpdate] = useState(0);
@@ -252,6 +254,15 @@ function App() {
 
         {/* Theme toggle & Notification */}
         <div className="flex justify-end mb-4 gap-2">
+          <button
+            onClick={() => setShowGuide(true)}
+            className="p-2.5 rounded-xl bg-white dark:bg-gray-800 border-2 border-cream dark:border-gray-700 text-gray-400 dark:text-gray-300 hover:text-lavender dark:hover:text-lavender hover:border-lavender transition-all duration-300 shadow-soft"
+            title="查看使用引导"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </button>
           <button
             onClick={async () => {
               if (Notification.permission === 'granted') return;
@@ -461,6 +472,9 @@ function App() {
 
       {/* Pomodoro Modal */}
       {showPomodoro && <Pomodoro onClose={() => setShowPomodoro(false)} />}
+
+      {/* 新手引导 */}
+      <OnboardingGuide show={showGuide} onClose={() => setShowGuide(false)} />
     </div>
   );
 }
